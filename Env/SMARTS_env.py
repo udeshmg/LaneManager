@@ -46,7 +46,7 @@ class SMARTS_env():
 
         road_graph = self.sim_client.send_message({'Init':'start'})
 
-        self.getSettings(road_graph)
+        self.get_settings(road_graph)
         self.road_network.buildGraphFromDict(road_graph["trafficData"])
         self.road_network.osmGraph.build_edge_map()
         self.num_agents = len(self.road_network.osmGraph.road_index_map)
@@ -55,7 +55,7 @@ class SMARTS_env():
         self.thread_count_get_states = [False for i in range(self.num_agents)]
         self.agent_actions = [1 for i in range(self.num_agents)]
 
-    def getSettings(self, road_graph):
+    def get_settings(self, road_graph):
         if "settings" in road_graph:
            settings = road_graph["settings"]
            if settings["externalListner"] == "CLLA":
@@ -63,7 +63,8 @@ class SMARTS_env():
            else:
                self.is_CLLA = False
 
-           self.secPerStep = settings["laneUpdateInterval"] / settings["numStepsPerSecond"]
+
+           self.secPerStep = settings["extListenerUpdateInterval"] / settings["numStepsPerSecond"]
 
 
     def step(self, action):

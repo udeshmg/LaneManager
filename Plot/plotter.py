@@ -13,7 +13,7 @@ def moving_average(values, window):
     return np.convolve(values, weights, 'valid')
 
 
-def plot_results(log_folder, title='Learning Curve', window_size=60):
+def plot_results(log_folder, title='Learning Curve', window_size=360):
     """
     plot the results
 

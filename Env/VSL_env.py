@@ -19,13 +19,14 @@ class VSLEnv(gym.Env):
     # Example for using image as input:
     self.iter = 0
     self.sim_client = ZeroMqClient(port="tcp://localhost:5556")
-    self.observation_space = spaces.Box(low=np.array([0,0]), high=np.array([30, 30]), dtype=np.uint8)
+    self.observation_space = spaces.Box(low=np.array([0, 0, 0, 0]), high=np.array([10, 10, 30, 30]), dtype=np.uint8)
     self.num_lanes  = num_lanes
     self.pre_reward = 0
-    self.pre_obs = [0,0]
+    self.pre_obs = [0, 0]
     self.up = 0
     self.down = 0
     self.is_episodic = True
+    self.time_step_size = 10
 
   def step(self, action):
     self.iter += 1
@@ -43,14 +44,14 @@ class VSLEnv(gym.Env):
 
   def reset(self):
       #self.sim_client.send_message({"Reset": []})
-      return [0,0]  # reward, done, info can't be included
+      return np.zeros( shape=self.observation_space.shape ) # reward, done, info can't be included
 
   def render(self, mode='human'):
-    # Simulation runs separately
-    pass
+        # Simulation runs separately
+        pass
 
   def close (self):
-    pass
+        pass
 
   def decode_message(self, message, action):
 
@@ -59,10 +60,14 @@ class VSLEnv(gym.Env):
           for edge in message["trafficData"]:
               if edge["index"] == 2:
                   onMove =  int(round(edge["numVehiclesOnMove"]))
-                  #lanes = edge["numLanes"]
-
-              if edge["index"] == 2:
                   stopped = int(round(edge["numVehiclesStopped"]))
+                  color_g = min(30, int(round(edge["timeToGreen"])))
+                  color_r = min(30, int(round(edge["timeToRed"])))
+                  exit_Flow = edge["exitFlow"]
+
+          if "settings" in  message:
+            self.time_step_size = message["settings"]["extListenerUpdateInterval"] / message["settings"]["numStepsPerSecond"]
+            print("Time step size: ", self.time_step_size, "(s)")
 
           #if self.iter%1 == 0:
           #      self.up = random.randint(0,250)
@@ -71,14 +76,14 @@ class VSLEnv(gym.Env):
           #downstream = self.down
           #upstream = self.up
 
-          observation = [onMove//5, stopped//5]
+          observation = [onMove//5, stopped//5, color_g, color_r]
 
           if onMove + stopped == 0:
               reward = 0
           else:
-                reward = -( abs(30-stopped))
+              reward = -stopped
 
-          if self.iter % 60 == 0:
+          if self.iter % int((1200//self.time_step_size)) == 0:
               print("############ End episode #############")
               if self.is_episodic:
                   done = True
