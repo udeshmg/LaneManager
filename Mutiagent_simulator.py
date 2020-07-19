@@ -12,8 +12,11 @@ handler = RL_Agent_Handler(wrapper)
 handler.create_agents(pre_trained=True)
 #handler.load_weights()
 start = time.time()
-handler.predict(70)
+while True:
+    handler.predict(120)
+    end = time.time()
+    print("Exec time", end - start)
+    wrapper.partition_env()
 #handler.learn(60)
-end = time.time()
 
-print("Exec time", end - start)
+

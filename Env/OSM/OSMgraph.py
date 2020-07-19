@@ -57,6 +57,10 @@ class OsmGraph():
             if u < v:
                 self.road_index_map.append([u, v])
 
+        #####
+        print("Number of nodes: ", len(self.nxGraph.nodes()))
+        print("Number of edges: ", len(self.nxGraph.edges()))
+
 
     def edge_index_from_nodes(self, actions):
         roads = []

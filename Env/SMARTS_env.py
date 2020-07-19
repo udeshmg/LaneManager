@@ -58,14 +58,14 @@ class SMARTS_env():
     def get_settings(self, road_graph):
         if "settings" in road_graph:
            settings = road_graph["settings"]
-           if settings["externalListner"] == "CLLA":
+           if settings["externalListener"] == "CLLA":
                self.is_CLLA = True
            else:
                self.is_CLLA = False
 
 
            self.secPerStep = settings["extListenerUpdateInterval"] / settings["numStepsPerSecond"]
-
+           self.dependency_graph.vehicle_value = settings["extListenerUpdateInterval"]/settings["mvgVehicleCount"]
 
     def step(self, action):
         #print("Step : Thread: ", threading.current_thread().getName(), self.iter)

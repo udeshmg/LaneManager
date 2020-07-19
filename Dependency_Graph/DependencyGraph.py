@@ -10,6 +10,10 @@ class DependencyGraph():
         self.len = 5
         self.max_exec_time = 0
 
+        #settings
+        self.vehicle_value = 1;
+
+
     def buildGraph(self, OD_list):
         for path in OD_list:
             print(path["path"], path["path"][0], path["path"][1])
@@ -22,7 +26,7 @@ class DependencyGraph():
             u = G[i[0]][i[1]]['edgeId']
             u1 = (i[0], i[1])
 
-            for j in range(min(len(i) - 1, 15)):
+            for j in range(min(len(i) - 1, 7)):
 
                 # v = getIndex(i[k],i[k+1], gridSize)
                 v = G[i[j]][i[j + 1]]['edgeId']
@@ -52,13 +56,14 @@ class DependencyGraph():
                         else:
                             self.diG[u][v]['connect_from'] = 'down_direction'
 
-        alpha = 0.9
+        alpha = 0
         for u,v in self.diG.edges():
             if 'direction' in self.diG[u][v]:
-                self.diG[u][v]['direction'] = alpha*self.diG[u][v]['direction']+(1-alpha)*self.diG[u][v]['temp_direction']
+                self.diG[u][v]['direction'] = alpha*self.diG[u][v]['direction']+(1-alpha)*(self.diG[u][v]['temp_direction']/self.vehicle_value)
                 self.diG[u][v]['temp_direction'] = 0
             else:
-                self.diG[u][v]['direction'] = self.diG[u][v]['temp_direction']
+                self.diG[u][v]['direction'] = (self.diG[u][v]['temp_direction']/self.vehicle_value)
+                self.diG[u][v]['temp_direction'] = 0
 
         pass
 
@@ -219,28 +224,28 @@ class DependencyGraph():
         decrease = False
         increase = False
 
-        upstream = upstream_direct/up_configuration
-        downstream = downstream_direct/down_configuration
-        up = up_direct/up_configuration
-        down= down_direct/down_configuration
+        upstream = upstream_direct/(up_configuration) # calculated from PDG
+        downstream = downstream_direct/(down_configuration)
+        up = up_direct/(up_configuration) # actual road value
+        down= down_direct/(down_configuration)
 
-        if (upstream / max(0.1,downstream)) > 1.2 and upstream > 0:
+        if (upstream / max(0.1,downstream)) > 1.2:
             #if upstream > down:
             #    action = 1
             #    increase = True
             #if down > 0.8*up and down > 5:
-            if down > 0.8*upstream and down > 5:
+            if down > 0.5*upstream:
                 action = 0
             else:
                 action = 1
                 increase = True
 
-        elif (downstream / max(0.1,upstream)) > 1.2 and downstream > 0:
+        elif (downstream / max(0.1,upstream)) > 1.2:
             #if downstream > up:
             #    action = -1
             #    decrease = True
             #if up > 0.8*down and up > 5:
-            if up > 0.8*downstream and up > 5:
+            if up > 0.5*downstream :
                 action = 0
             else:
                 action = -1
@@ -706,3 +711,18 @@ class DependencyGraph():
             if l[i][column] == startNode:
                 return i
         return -1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

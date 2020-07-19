@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 from stable_baselines.bench import Monitor
 
 import threading
-
+import copy
 
 
 
@@ -28,10 +28,13 @@ class RL_Agent_Handler():
         self.partitions = []
 
     def create_agents(self, pre_trained, path="backups/RL_agent6iter200000.zip"):
+        dummy_agent = DQN.load(path)
         for index, partition in enumerate(self.env.get_partitions()):
             self.partitions.append(partition)
             if pre_trained:
-                agent = DQN.load(path, env=partition)
+                #agent = DQN.load(path, env=partition)
+                agent = copy.copy(dummy_agent)
+                agent.env = partition
                 agent.exploration_initial_eps = 0
                 agent.exploration_final_eps = 0
             else:
@@ -56,10 +59,11 @@ class RL_Agent_Handler():
 
     def load_weights(self, id):
         print("Agent Loaded: ", id)
-        self.agents[id] = DQN.load("backups/RL_agent6iter200000.zip", env=self.partitions[id])
+        self.agents[id] = DQN.load("backups/Lane_iter200000_lane4.zip", env=self.partitions[id])
         print("Agent Loaded: ", id, "Competed")
 
     def predict(self, time_steps):
+        self.threads = []
         for index, agent in enumerate(self.agents):
             self.threads.append(threading.Thread(target=self.predict_for_num_steps,
                                                  args=(agent, self.partitions[index], time_steps),

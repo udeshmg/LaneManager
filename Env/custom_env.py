@@ -26,7 +26,7 @@ class CustomEnv(gym.Env):
     self.pre_obs = [0,0,num_lanes//2]
     self.up = 0
     self.down = 0
-
+    self.is_episodic = False
     self.is_simulator_used = False
 
     self.randForUp = 0

@@ -54,7 +54,7 @@ class Partitioned_env(gym.Env):
 
     def reset(self):
         #self.sim_client.send_message({"Reset": []})
-        return [0,0,3]  # reward, done, info can't be included
+        return [0,0,self.num_lanes//2]  # reward, done, info can't be included
 
     def render(self, mode='human'):
         # Simulation runs separately
