@@ -81,7 +81,7 @@ dir= "7x7/Demand_amount/unidirectional/"
 import os
 path = 'C:/Users/pgunarathna/PycharmProjects/SMARTS_interface/Test/7x7/Demand_amount/'
 path = 'C:/Users/pgunarathna/IdeaProjects/Temporary_update_smarts/download/Journal/' \
-       'Lanes/'
+       'Demand_freq/'
 
 for dirname, _, file_names in os.walk(path):
     file_names.sort(key=lambda  x : os.path.getmtime(dirname+x), reverse=True)

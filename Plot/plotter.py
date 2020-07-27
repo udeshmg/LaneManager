@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from stable_baselines.results_plotter import ts2xy, load_results
+import pandas as pd
+import seaborn as sns
+#from stable_baselines.results_plotter import ts2xy, load_results
 
 def moving_average(values, window):
     """
@@ -32,6 +34,23 @@ def plot_results(log_folder, title='Learning Curve', window_size=360):
     plt.title(title + " Smoothed")
     plt.show()
 
+def load_result_from_csv(lower, upper, file_name='../RL_Agent/Vehicle/Episode_data.csv'):
+    df = pd.read_csv(file_name)
+
+    def func(df, lower, upper):
+        data = df[(df['episode number'] > lower) & (df['episode number'] < upper)]
+        return data
+
+
+    df = func(df, lower ,upper)
+
+    annot = df.pivot('episode number', 'step', 'speed')
+    df = df.pivot('episode number', 'step', 'action')
+
+    print(df)
+
+    sns.heatmap(df, annot=annot, fmt="d")
+    plt.show()
+
 if __name__ == '__main__':
-    log_dir = "../RL_Agent/Logs/VSL"
-    plot_results(log_dir)
+    load_result_from_csv(20830,20850)

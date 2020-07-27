@@ -26,7 +26,7 @@ class DependencyGraph():
             u = G[i[0]][i[1]]['edgeId']
             u1 = (i[0], i[1])
 
-            for j in range(min(len(i) - 1, 7)):
+            for j in range(min(len(i) - 1, 15)):
 
                 # v = getIndex(i[k],i[k+1], gridSize)
                 v = G[i[j]][i[j + 1]]['edgeId']
