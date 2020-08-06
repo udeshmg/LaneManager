@@ -138,11 +138,11 @@ class Monitor_save_step_data(gym.Wrapper):
             else:
                 self.needs_reset = True
 
-            if info['successful']:
+            if info['is_success']:
                 self.episode_success.append(True)
             else:
                 self.episode_success.append(False)
-            self.move_step_to_episode(info['successful'])
+            self.move_step_to_episode(info['is_success'])
 
             ep_rew = sum(self.rewards)
             eplen = len(self.rewards)

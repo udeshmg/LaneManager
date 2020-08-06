@@ -44,8 +44,8 @@ def load_result_from_csv(lower, upper, file_name='../RL_Agent/Vehicle/Episode_da
 
     df = func(df, lower ,upper)
 
-    annot = df.pivot('episode number', 'step', 'speed')
-    df = df.pivot('episode number', 'step', 'action')
+    annot = df.pivot('episode number', 'step', 'time')
+    df = df.pivot('episode number', 'step', 'speed')
 
     print(df)
 
@@ -53,4 +53,4 @@ def load_result_from_csv(lower, upper, file_name='../RL_Agent/Vehicle/Episode_da
     plt.show()
 
 if __name__ == '__main__':
-    load_result_from_csv(20830,20850)
+    load_result_from_csv(8250,8300, file_name='C:/Users/pgunarathna/PycharmProjects/LaneManager/backups/Vehicle/DQN_26/Episode_data.csv')

@@ -56,8 +56,11 @@ class Vehicle_env(gym.Env):
         else:
             paddleCommand = 1
 
-        print("Action", paddleCommand)
+        #print("Action", paddleCommand)
         message_send = {'edges': [], 'vehicles':[{"index":self.id, "paddleCommand": paddleCommand}]}
+
+        if self.iter % 500 == 0:
+            print("Step ", self.iter)
 
         if self.is_simulator_used:
             message = self.sim_client.send_message(message_send)
@@ -91,7 +94,7 @@ class Vehicle_env(gym.Env):
         obs = [speed,time,distance]
         done = False
         reward = 0
-        info = {'successful':False}
+        info = {'is_success':False}
 
         if self.is_simulator_used:
             print(message["vehicles"])
@@ -118,11 +121,11 @@ class Vehicle_env(gym.Env):
 
         else:
             obs, reward, done, info = self.vehicle.step(action)
-            print("Obs: ", obs, "reward: ", reward, "done: ", done)
+            #print("Obs: ", obs, "reward: ", reward, "done: ", done)
 
             if done:
                 self.episode_num += 1
-                if info['successful']:
+                if info['is_success']:
                     self.correctly_ended.append(self.episode_num)
 
 

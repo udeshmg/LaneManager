@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-import math
+import math, statistics
 import seaborn as sns
 import matplotlib.pyplot as plt
 
@@ -62,10 +62,22 @@ def getTotalTravelTime(df):
 def getTravelTimeShift(df, per):
     totalCount = 0
     outCount = 0
+    l = []
     for i,j in zip(df['ActualTravelTime'], df['BestTravelTime']):
        if (float(i)/float(j)) > per:
            outCount += 1
+       l.append((float(i) / float(j)))
        totalCount += 1
+    l = np.array(l)
+    print("Std: ", np.std(l))
+
+    var = 0
+    mean = np.mean(l)
+    for i in l:
+        if i > 1:
+            var += (1-i)**2
+    print("Std: ", np.sqrt(var/l.size))
+
     return outCount/max(1, totalCount)
 
 def sort(df, column_name):
@@ -80,8 +92,7 @@ dir= "7x7/Demand_amount/unidirectional/"
 
 import os
 path = 'C:/Users/pgunarathna/PycharmProjects/SMARTS_interface/Test/7x7/Demand_amount/'
-path = 'C:/Users/pgunarathna/IdeaProjects/Temporary_update_smarts/download/Journal/' \
-       'Demand_freq/'
+path = 'C:/Users/pgunarathna/IdeaProjects/Temporary_update_smarts/download/Journal/RN/'
 
 for dirname, _, file_names in os.walk(path):
     file_names.sort(key=lambda  x : os.path.getmtime(dirname+x), reverse=True)
@@ -99,7 +110,7 @@ for dirname, _, file_names in os.walk(path):
             #if name[0].find('txt') == -1:
             #    os.rename(dirname+file_name, dirname+name[0]+".txt")
 
-        if index > 5:
+        if index > 15:
             break
 
     break

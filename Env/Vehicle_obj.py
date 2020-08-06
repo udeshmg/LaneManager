@@ -11,7 +11,7 @@ class Vehicle:
     def step(self, acceleration):
         done = False
         reward = 0
-        info = {'successful':False}
+        info = {'is_success':False}
 
         self.speed += acceleration
 
@@ -28,8 +28,8 @@ class Vehicle:
 
         if done:
             if (self.location < 2 and self.time_to_reach < 2):
-                reward = 10 + 0.8*self.speed
-                info = {'successful':True}
+                reward = 10 + self.speed
+                info = {'is_success':True}
             else:
                 reward = -10
         else:

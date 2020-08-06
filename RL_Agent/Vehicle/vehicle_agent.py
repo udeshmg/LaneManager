@@ -23,8 +23,8 @@ import threading
 class CustomDQNPolicy(FeedForwardPolicy):
     def __init__(self, *args, **kwargs):
         super(CustomDQNPolicy, self).__init__(*args, **kwargs,
-                                           layers=[12, 12],
-                                           layer_norm=False,
+                                           layers=[32, 32],
+                                           layer_norm=True,
                                            feature_extraction="mlp")
 
 def make_env(env_id, rank, seed=0):
@@ -46,46 +46,49 @@ def make_env(env_id, rank, seed=0):
 if __name__ == '__main__':
     env_id = "Vehicles"
     num_cpu = 4  # Number of processes to use
-    # Create the vectorized environment
-    #env = SubprocVecEnv([make_env(env_id, i) for i in range(num_cpu)])
     log_dir = "Logs/"+env_id
     os.makedirs(log_dir, exist_ok=True)
-
+    pre_trained = False
 
     action_space = 3
-    time_steps = 500000
-
+    time_steps = 200000
 
     # Create the callback: check every 1000 steps
     callback = SaveOnBestTrainingRewardCallback(check_freq=100, log_dir=log_dir)
 
-    print("Save to :", "RL_agent_vsl_"+"iter"+str(time_steps))
-    #env = gym.make(env_id)
     env = Vehicle_env(1, action_space)
     env.is_simulator_used = False
     env = Monitor_save_step_data(env, log_dir)
 
-    # Stable Baselines provides you with make_vec_env() helper
-    # which does exactly the previous steps for you:
-    # env = make_vec_env(env_id, n_envs=num_cpu, seed=0)
 
-    model = DQN(MlpPolicy, env, gamma=1,
-                exploration_fraction=0.3,
-                exploration_final_eps=0,
-                learning_rate=5e-5,
-                batch_size=256,
-                tensorboard_log="../Logs/Vehicle/",
-                full_tensorboard_log=True)
+    if not pre_trained:
+        model = DQN(CustomDQNPolicy, env, gamma=1,
+                    exploration_fraction=0.3,
+                    exploration_final_eps=0,
+                    learning_rate=1e-4,
+                    prioritized_replay=True,
+                    target_network_update_freq=200,
+                    batch_size=256,
+                    tensorboard_log="./Logs/Vehicles/",
+                    #full_tensorboard_log=True,
+                    double_q=True,
+                    verbose=1
+                    )
+    else:
+        model = DQN.load("Vehicles_iter_200000.zip")
+        model.env = env
+        model.exploration_initial_eps = 0.02
+        model.exploration_final_eps = 0.02
 
     start = time.time()
-    model.learn(total_timesteps=time_steps, callback=callback)
+    model.learn(total_timesteps=time_steps)
     end  = time.time()
     model.save(env_id+"_iter_"+str(time_steps))
     print("Training time: ", end-start)
 
     print("Successful episodes:", env.correctly_ended)
-
     env.close()
+
     #Results Plot
     results_plotter.plot_results([log_dir], time_steps, results_plotter.X_TIMESTEPS, "Speed Limit Manager")
     plt.show()
