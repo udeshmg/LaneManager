@@ -23,7 +23,7 @@ import threading
 class CustomDQNPolicy(FeedForwardPolicy):
     def __init__(self, *args, **kwargs):
         super(CustomDQNPolicy, self).__init__(*args, **kwargs,
-                                           layers=[32, 32],
+                                           layers=[64, 64, 64],
                                            layer_norm=True,
                                            feature_extraction="mlp")
 
@@ -63,11 +63,11 @@ if __name__ == '__main__':
 
     if not pre_trained:
         model = DQN(CustomDQNPolicy, env, gamma=1,
-                    exploration_fraction=0.3,
+                    exploration_fraction=0.6,
                     exploration_final_eps=0,
                     learning_rate=1e-4,
                     prioritized_replay=True,
-                    target_network_update_freq=200,
+                    target_network_update_freq=2000,
                     batch_size=256,
                     tensorboard_log="./Logs/Vehicles/",
                     #full_tensorboard_log=True,

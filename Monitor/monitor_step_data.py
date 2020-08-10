@@ -68,6 +68,7 @@ class Monitor_save_step_data(gym.Wrapper):
         self.episode_remain_time = []
         self.episode_distance = []
         self.episode_success = []
+        self.mask = []
 
         self.actions = []
         self.speeds = []
@@ -93,7 +94,7 @@ class Monitor_save_step_data(gym.Wrapper):
             self.current_reset_info[key] = value
         return self.env.reset(**kwargs)
 
-    def move_step_to_episode(self, outcome):
+    def move_step_to_episode(self, outcome, fill_value):
         if outcome:
             fill_value = 3
         else:
@@ -107,6 +108,8 @@ class Monitor_save_step_data(gym.Wrapper):
         self.times.clear()
         self.episode_distance.append(self.fill_array(self.distance, fill_value).copy())
         self.distance.clear()
+
+        self.mask.append([False if i < len(self.actions) else True for i in range(30)])
 
     def fill_array(self, array, fill_value):
         fill = [fill_value for i in range(30 - len(array))]
@@ -142,7 +145,7 @@ class Monitor_save_step_data(gym.Wrapper):
                 self.episode_success.append(True)
             else:
                 self.episode_success.append(False)
-            self.move_step_to_episode(info['is_success'])
+            self.move_step_to_episode(info['is_success'], sum(self.rewards))
 
             ep_rew = sum(self.rewards)
             eplen = len(self.rewards)
@@ -163,14 +166,15 @@ class Monitor_save_step_data(gym.Wrapper):
 
     def prepare_dataFrame(self):
         new_list = []
-        for index, (action, speed, time, distance) in enumerate(zip(self.episode_actions,
+        for index, (action, speed, time, distance, mask) in enumerate(zip(self.episode_actions,
                                           self.episode_speed,
                                           self.episode_remain_time,
-                                          self.episode_distance)):
-            for step, (a,s,t,d) in enumerate(zip(action, speed, time, distance)):
-                new_list.append([step, index, a, s, t, d, self.episode_success[index]])
+                                          self.episode_distance,
+                                        self.mask)):
+            for step, (a,s,t,d, m) in enumerate(zip(action, speed, time, distance, mask)):
+                new_list.append([step, index, a, s, t, d, self.episode_success[index], m])
 
-        df = pd.DataFrame(new_list, columns=['step', 'episode number', 'action', 'speed', 'time', 'distance', 'success'], index=None)
+        df = pd.DataFrame(new_list, columns=['step', 'episode number', 'action', 'speed', 'time', 'distance', 'success', 'm'], index=None)
         df.to_csv("Episode_data.csv")
 
 

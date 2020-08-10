@@ -44,13 +44,16 @@ def load_result_from_csv(lower, upper, file_name='../RL_Agent/Vehicle/Episode_da
 
     df = func(df, lower ,upper)
 
-    annot = df.pivot('episode number', 'step', 'time')
-    df = df.pivot('episode number', 'step', 'speed')
+    annot = df.pivot('episode number', 'step', 'speed')
+    df = df.pivot('episode number', 'step', 'action')
 
     print(df)
 
-    sns.heatmap(df, annot=annot, fmt="d")
+    sns.heatmap(df, annot=annot, fmt="d", vmin=-1, vmax=3)
     plt.show()
 
+file_name='C:/Users/pgunarathna/PycharmProjects/LaneManager/backups/Vehicle/DQN_26/Episode_data.csv'
 if __name__ == '__main__':
-    load_result_from_csv(8250,8300, file_name='C:/Users/pgunarathna/PycharmProjects/LaneManager/backups/Vehicle/DQN_26/Episode_data.csv')
+    load_result_from_csv(8300,8380,
+                         #file_name=file_name
+                         )
