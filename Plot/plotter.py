@@ -49,11 +49,13 @@ def load_result_from_csv(lower, upper, file_name='../RL_Agent/Vehicle/Episode_da
 
     print(df)
 
-    sns.heatmap(df, annot=annot, fmt="d", vmin=-1, vmax=3)
+    sns.heatmap(df, annot=annot,
+                vmin=-1, vmax=3
+                )
     plt.show()
 
 file_name='C:/Users/pgunarathna/PycharmProjects/LaneManager/backups/Vehicle/DQN_26/Episode_data.csv'
 if __name__ == '__main__':
-    load_result_from_csv(8300,8380,
+    load_result_from_csv(11150,11200,
                          #file_name=file_name
                          )

@@ -17,7 +17,7 @@ class Vehicle_env(gym.Env):
     # time_to_reach: Time remaining to reach destination
     # distance: Distance to destination
 
-    def __init__(self, id, num_actions, max_speed=10, time_to_reach=30, distance=100):
+    def __init__(self, id, num_actions, max_speed=22, time_to_reach=45, distance=400):
         super(Vehicle_env, self).__init__()
         # Define action and observation space
         # They must be gym.spaces objects
@@ -74,8 +74,11 @@ class Vehicle_env(gym.Env):
     def reset(self):
         #self.sim_client.send_message({"Reset": []})
         if self.is_simulator_used:
-            self.time_to_reach = np.random.randint(8,16)
-            return [0, 50, self.time_to_reach]  # reward, done, info can't be included
+            message_send = {'edges': [], 'vehicles': [{"index": self.id, "paddleCommand": 0}]}
+            message = self.sim_client.send_message(message_send)
+            observation, _, _, _ = self.decode_message(message, 0)
+            #self.time_to_reach = np.random.randint(8,16)
+            return observation # reward, done, info can't be included
         else:
             return self.vehicle.reset()
 
@@ -97,27 +100,27 @@ class Vehicle_env(gym.Env):
         info = {'is_success':False}
 
         if self.is_simulator_used:
-            print(message["vehicles"])
+            #print(message["vehicles"])
             for vehicle in message["vehicles"]:
                 if vehicle["vid"] == self.id:
                     speed   = int(round(vehicle["speed"]))
-                    time    = vehicle["timeRemain"]
-                    distance = int(round(vehicle["headPositionFromEnd"]))//50
+                    time    = int(vehicle["timeRemain"])
+                    distance = int(round(vehicle["headPositionFromEnd"]))
                     done = vehicle["done"]
 
                     obs = [speed, time, distance]
 
                     if done:
                         self.episode_num += 1
-                        if vehicle["headPositionFromEnd"] < 5 and time < 1:
-                            reward = 500
-                            self.correctly_ended.append(self.episode_num)
+                        if vehicle["is_success"]:
+                            reward = 0.5*speed
+                            info["is_success"] = True
                         else:
-                            reward = -500
+                            reward = -10
                     else:
-                        reward = -distance
+                        reward = -distance/400
 
-                    print("Reward  given", reward)
+                    #print("Reward  given", reward)
 
         else:
             obs, reward, done, info = self.vehicle.step(action)

@@ -75,6 +75,8 @@ class Monitor_save_step_data(gym.Wrapper):
         self.times = []
         self.distance = []
 
+        self.iter = 0
+
     def reset(self, **kwargs) -> np.ndarray:
         """
         Calls the Gym environment reset. Can only be called if the environment is over, or if allow_early_resets is True
@@ -109,10 +111,10 @@ class Monitor_save_step_data(gym.Wrapper):
         self.episode_distance.append(self.fill_array(self.distance, fill_value).copy())
         self.distance.clear()
 
-        self.mask.append([False if i < len(self.actions) else True for i in range(30)])
+        self.mask.append([False if i < len(self.actions) else True for i in range(47)])
 
     def fill_array(self, array, fill_value):
-        fill = [fill_value for i in range(30 - len(array))]
+        fill = [fill_value for i in range(47 - len(array))]
         concat = array + fill
         return concat
 
@@ -123,6 +125,10 @@ class Monitor_save_step_data(gym.Wrapper):
         :param action: (np.ndarray) the action
         :return: (Tuple[np.ndarray, float, bool, Dict[Any, Any]]) observation, reward, done, information
         """
+        self.iter += 1
+        if ( self.iter % 50000 == 0 and self.iter > 1):
+            self.prepare_dataFrame()
+
         if self.needs_reset:
             raise RuntimeError("Tried to step environment that needs reset")
         observation, reward, done, info = self.env.step(action)

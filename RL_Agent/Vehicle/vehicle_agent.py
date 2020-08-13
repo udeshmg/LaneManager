@@ -10,7 +10,7 @@ from stable_baselines.common.policies import MlpPolicy
 from stable_baselines.deepq.policies import MlpPolicy, FeedForwardPolicy
 from stable_baselines.common.vec_env import SubprocVecEnv
 from stable_baselines.common import set_global_seeds, make_vec_env
-from stable_baselines import ACKTR, DQN
+from stable_baselines import ACKTR, DQN, A2C, ACER
 from Env.vehicle_env import Vehicle_env
 from Env.VSL_env import VSLEnv
 from stable_baselines import results_plotter
@@ -25,6 +25,14 @@ class CustomDQNPolicy(FeedForwardPolicy):
         super(CustomDQNPolicy, self).__init__(*args, **kwargs,
                                            layers=[64, 64, 64],
                                            layer_norm=True,
+                                           feature_extraction="mlp")
+
+from stable_baselines.common.policies import FeedForwardPolicy
+class CustomA2CPolicy(FeedForwardPolicy):
+    def __init__(self, *args, **kwargs):
+        super(CustomA2CPolicy, self).__init__(*args, **kwargs,
+                                           net_arch=[dict(pi=[64, 64, 64],
+                                                          vf=[64, 64, 64])],
                                            feature_extraction="mlp")
 
 def make_env(env_id, rank, seed=0):
@@ -48,40 +56,43 @@ if __name__ == '__main__':
     num_cpu = 4  # Number of processes to use
     log_dir = "Logs/"+env_id
     os.makedirs(log_dir, exist_ok=True)
-    pre_trained = False
+    pre_trained = True
 
     action_space = 3
-    time_steps = 200000
+    time_steps = 400000
 
     # Create the callback: check every 1000 steps
     callback = SaveOnBestTrainingRewardCallback(check_freq=100, log_dir=log_dir)
 
     env = Vehicle_env(1, action_space)
-    env.is_simulator_used = False
+    env.is_simulator_used = True
     env = Monitor_save_step_data(env, log_dir)
 
 
     if not pre_trained:
         model = DQN(CustomDQNPolicy, env, gamma=1,
-                    exploration_fraction=0.6,
+                    exploration_fraction=0.3,
                     exploration_final_eps=0,
-                    learning_rate=1e-4,
+                    learning_rate=1e-3,
                     prioritized_replay=True,
-                    target_network_update_freq=2000,
+                    target_network_update_freq=8000,
                     batch_size=256,
                     tensorboard_log="./Logs/Vehicles/",
                     #full_tensorboard_log=True,
                     double_q=True,
                     verbose=1
                     )
+
+        #model = ACKTR(CustomA2CPolicy, env, tensorboard_log="./Logs/Vehicles/", verbose=1)
     else:
-        model = DQN.load("Vehicles_iter_200000.zip")
+        model = DQN.load("Vehicles_iter_400000.zip")
         model.env = env
-        model.exploration_initial_eps = 0.02
-        model.exploration_final_eps = 0.02
+        model.exploration_initial_eps = 0
+        model.exploration_final_eps = 0
+        model.tensorboard_log="./Logs/Vehicles/"
 
     start = time.time()
-    model.learn(total_timesteps=time_steps)
+    model.learn(total_timesteps=time_steps, log_interval=100)
     end  = time.time()
     model.save(env_id+"_iter_"+str(time_steps))
     print("Training time: ", end-start)
