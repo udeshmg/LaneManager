@@ -17,15 +17,16 @@ from stable_baselines import results_plotter
 import matplotlib.pyplot as plt
 from stable_baselines.bench import Monitor
 #from Plot.plotter import plot_results
-
+import tensorflow as tf
 import threading
 
 class CustomDQNPolicy(FeedForwardPolicy):
     def __init__(self, *args, **kwargs):
         super(CustomDQNPolicy, self).__init__(*args, **kwargs,
-                                           layers=[64, 64, 64],
+                                           layers=[32, 32, 32],
                                            layer_norm=True,
-                                           feature_extraction="mlp")
+                                           feature_extraction="mlp",
+                                            act_fun=tf.nn.tanh)
 
 from stable_baselines.common.policies import FeedForwardPolicy
 class CustomA2CPolicy(FeedForwardPolicy):
@@ -53,10 +54,10 @@ def make_env(env_id, rank, seed=0):
 
 if __name__ == '__main__':
     env_id = "Vehicles"
-    num_cpu = 4  # Number of processes to use
+
     log_dir = "Logs/"+env_id
     os.makedirs(log_dir, exist_ok=True)
-    pre_trained = True
+    pre_trained = False
 
     action_space = 3
     time_steps = 400000
@@ -65,19 +66,19 @@ if __name__ == '__main__':
     callback = SaveOnBestTrainingRewardCallback(check_freq=100, log_dir=log_dir)
 
     env = Vehicle_env(1, action_space)
-    env.is_simulator_used = True
+    env.is_simulator_used = False
     env = Monitor_save_step_data(env, log_dir)
 
 
     if not pre_trained:
         model = DQN(CustomDQNPolicy, env, gamma=1,
-                    exploration_fraction=0.3,
+                    exploration_fraction=0.2,
                     exploration_final_eps=0,
-                    learning_rate=1e-3,
+                    learning_rate=1e-4,
                     prioritized_replay=True,
                     target_network_update_freq=8000,
                     batch_size=256,
-                    tensorboard_log="./Logs/Vehicles/",
+                    #tensorboard_log="./Logs/Vehicles/",
                     #full_tensorboard_log=True,
                     double_q=True,
                     verbose=1
@@ -97,7 +98,7 @@ if __name__ == '__main__':
     model.save(env_id+"_iter_"+str(time_steps))
     print("Training time: ", end-start)
 
-    print("Successful episodes:", env.correctly_ended)
+    #print("Successful episodes:", env.correctly_ended)
     env.close()
 
     #Results Plot

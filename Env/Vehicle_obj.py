@@ -31,7 +31,7 @@ class Vehicle:
 
         if done:
             if (self.location < 2 and self.time_to_reach < 2):
-                reward = 0.5*self.speed
+                reward = 10 + self.speed
                 info = {'is_success':True}
             else:
                 reward = -10

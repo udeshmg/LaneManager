@@ -54,8 +54,8 @@ def load_result_from_csv(lower, upper, file_name='../RL_Agent/Vehicle/Episode_da
                 )
     plt.show()
 
-file_name='C:/Users/pgunarathna/PycharmProjects/LaneManager/backups/Vehicle/DQN_26/Episode_data.csv'
+file_name='C:/Users/pgunarathna/PycharmProjects/LaneManager/backups/Vehicle/Trained_400000_64x3_lr_5_SMARTS/Episode_data.csv'
 if __name__ == '__main__':
-    load_result_from_csv(11150,11200,
+    load_result_from_csv(11650,11700,
                          #file_name=file_name
                          )

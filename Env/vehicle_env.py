@@ -113,7 +113,7 @@ class Vehicle_env(gym.Env):
                     if done:
                         self.episode_num += 1
                         if vehicle["is_success"]:
-                            reward = 0.5*speed
+                            reward = 10+speed
                             info["is_success"] = True
                         else:
                             reward = -10
