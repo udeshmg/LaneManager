@@ -49,7 +49,8 @@ class SMARTS_env():
         self.get_settings(road_graph)
         self.road_network.buildGraphFromDict(road_graph["trafficData"])
         self.road_network.osmGraph.build_edge_map()
-        self.num_agents = len(self.road_network.osmGraph.road_index_map)
+
+        self.num_agents = self.road_network.osmGraph.controllable_roads()
 
         self.thread_count_step = [False for i in range(self.num_agents)]
         self.thread_count_get_states = [False for i in range(self.num_agents)]
@@ -124,9 +125,7 @@ class SMARTS_env():
     def get_states(self):
 
         self.g_get_states.acquire()
-
         partition = int(threading.current_thread().getName())
-
         self.thread_count_get_states[partition] = True
 
         while not self.step_complete:
@@ -144,7 +143,6 @@ class SMARTS_env():
 
 
         self.g_get_states.release()
-
         return state, reward, done, info
 
     def reset(self):

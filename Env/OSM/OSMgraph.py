@@ -61,6 +61,13 @@ class OsmGraph():
         print("Number of nodes: ", len(self.nxGraph.nodes()))
         print("Number of edges: ", len(self.nxGraph.edges()))
 
+    def controllable_roads(self):
+        num = 0
+        for x in self.road_index_map:
+            u, v = x
+            if not (self.nxGraph[u][v]["numLanes"] == 1):
+                num += 1
+        return num
 
     def edge_index_from_nodes(self, actions):
         roads = []
@@ -91,7 +98,9 @@ class OsmGraph():
         downstream = int(round(self.nxGraph[u][v]["numVehiclesMvg"]))
         lanes = int(round(self.nxGraph[v][u]["numLanes"]))
 
-        return [upstream, downstream, lanes]
+        lanes_opposite = int(round(self.nxGraph[u][v]["numLanes"]))
+
+        return [upstream, downstream, lanes, lanes_opposite]
 
 
     def drawGraph(self,block=True, attr='length'):

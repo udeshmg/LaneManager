@@ -100,9 +100,9 @@ class CustomEnv(gym.Env):
           #
           #print(upstream, downstream)
           if action == 0:
-                l = max(2,lanes-1)
+                l = max(1,lanes-1)
           elif action == 2:
-                l = min(self.num_lanes-2,lanes+1)
+                l = min(self.num_lanes-1,lanes+1)
           else:
                 l = lanes
           print("data: ", upstream, downstream)

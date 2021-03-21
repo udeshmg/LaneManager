@@ -1,23 +1,11 @@
-import gym
-import numpy as np
-import os
-from Monitor.callback import SaveOnBestTrainingRewardCallback
+
 from stable_baselines.common.policies import MlpPolicy
 from stable_baselines.deepq.policies import MlpPolicy, FeedForwardPolicy
-from stable_baselines.common.vec_env import SubprocVecEnv
-from stable_baselines.common import set_global_seeds, make_vec_env
 from stable_baselines import ACKTR, DQN
-from Env.custom_env import CustomEnv
-from Env.partitioned_env import Partitioned_env
 from Env.Wrapper_env import Wrapper
-from stable_baselines import results_plotter
-import matplotlib.pyplot as plt
-from stable_baselines.bench import Monitor
 
 import threading
 import copy
-
-
 
 class RL_Agent_Handler():
 
@@ -28,12 +16,18 @@ class RL_Agent_Handler():
         self.partitions = []
 
     def create_agents(self, pre_trained, path="backups/RL_agent6iter200000.zip"):
-        dummy_agent = DQN.load(path)
+
+        dummy_agent_4 = DQN.load("backups/Lane_iter200000_lane4.zip")
+        dummy_agent_6 = DQN.load("backups/RL_agent6iter200000.zip")
+
         for index, partition in enumerate(self.env.get_partitions()):
             self.partitions.append(partition)
+
             if pre_trained:
-                #agent = DQN.load(path, env=partition)
-                agent = copy.copy(dummy_agent)
+                if partition.num_lanes == 4:
+                    agent = copy.copy(dummy_agent_4)
+                else:
+                    agent = copy.copy(dummy_agent_6)
                 agent.env = partition
                 agent.exploration_initial_eps = 0
                 agent.exploration_final_eps = 0
@@ -44,10 +38,10 @@ class RL_Agent_Handler():
             self.agents.append(agent)
 
     def learn(self, time_steps):
-        print("Agents: ")
         for index, agent in enumerate(self.agents):
             self.threads.append(threading.Thread(target=agent.learn, args=(time_steps,), name=str(index)))
             print("Thread added: ", index)
+
         for thread in self.threads:
             thread.setDaemon(True)
             thread.start()
@@ -78,10 +72,23 @@ class RL_Agent_Handler():
             thread.join()
 
     def predict_for_num_steps(self, agent, env, time_steps):
-        # predict actions in a multi-threaded env
         obs = [0, 0, 3]
 
         for i in range(time_steps):
+            """num_lanes = env.num_lanes
+
+            if agent.num_lanes != num_lanes:
+                print("OBS:", obs)
+                path = "backups/RL_agent"+str(num_lanes)+"iter200000.zip"
+                agent = DQN.load(path)
+                agent.num_lanes = env.num_lanes
+                agent.env = env
+                agent.exploration_initial_eps = 0
+                agent.exploration_final_eps = 0
+                self.agents[env.id] = agent   
+             """
+
+
             action = agent.predict(obs, deterministic=True)
             obs, rewards, dones, info = env.step(action[0])
             obs, rewards, dones, info = env.get_states()

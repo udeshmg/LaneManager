@@ -16,7 +16,11 @@ class Wrapper():
                 verbose = 2
             else:
                 verbose = 0
-            self.partitions.append(Partitioned_env(3, 6,  self.env, index, verbose))
+
+            obs = self.env.road_network.osmGraph.get_road_data(index)
+            lanes = obs[2] + obs[3]
+
+            self.partitions.append(Partitioned_env(3, lanes, self.env, index, verbose))
 
     def get_partitions(self):
         return self.partitions

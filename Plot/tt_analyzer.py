@@ -55,18 +55,60 @@ def splitBasedOnTime(df, time_step, total):
 
 def getTotalTravelTime(df):
     time = 0
+    time_dir = 0
+    count = 0
+    count_l = 0
+    time_l = 0
+    for i,j,k,l in zip(df['ActualTravelTime'], df['BestTravelTime'], df['TimeOnDirectional'], df['TimeOnDirectionalSpeed']):
+       time += float(i)
+       if float(k) * 1.2 >= float(i):
+        time_dir += float(i)
+        count += 1
+       if float(l) >= 0:
+           time_l += float(l)
+           count_l += 1
+
+    return time/max(1,df.shape[0]), time_dir/max(1,count), count, time_l/max(1,count_l), count_l
+
+def getTotalTravelTimeFirst(df):
+    time = 0
+    time_dir = 0
+    count = 0
+    count_l = 0
+    time_l = 0
     for i,j in zip(df['ActualTravelTime'], df['BestTravelTime']):
-       time += float(i) - float(j)
+       time += float(i)-float(j)
+
+
     return time/max(1,df.shape[0])
+
+def getTravelTime(df, shift):
+    time = 0
+    count = 0
+    for i,j in zip(df['ActualTravelTime'], df['BestTravelTime']):
+        if (float(i) / float(j)) > shift:
+            time += float(i)
+            count += 1
+    return time/max(1,max(0,count)), count
 
 def getTravelTimeShift(df, per):
     totalCount = 0
     outCount = 0
+    l = []
     for i,j in zip(df['ActualTravelTime'], df['BestTravelTime']):
        if (float(i)/float(j)) > per:
            outCount += 1
+       l.append((float(i) / float(j)))
        totalCount += 1
-    return outCount/max(1, totalCount)
+    l = np.array(l)
+    print("Std: ", np.std(l))
+
+    var = 0
+    mean = np.mean(l)
+    for i in l:
+        if i > 1:
+            var += (1-i)**2
+    print("Std: ", np.sqrt(var/l.size))
 
 def sort(df, column_name):
     for index, item in enumerate(df[column_name]):
@@ -80,8 +122,8 @@ dir= "7x7/Demand_amount/unidirectional/"
 
 import os
 path = 'C:/Users/pgunarathna/PycharmProjects/SMARTS_interface/Test/7x7/Demand_amount/'
-path = 'C:/Users/pgunarathna/IdeaProjects/Temporary_update_smarts/download/Journal/' \
-       'Lanes/'
+path = 'C:/Users/pgunarathna/IdeaProjects/Temporary_update_smarts/download/Journal/revised/NYC/OriginalMap/test/7am/'
+#path = 'C:/Users/pgunarathna/IdeaProjects/Temporary_update_smarts/download/Journal/revised/laneClearing/'
 
 for dirname, _, file_names in os.walk(path):
     file_names.sort(key=lambda  x : os.path.getmtime(dirname+x), reverse=True)
@@ -93,13 +135,15 @@ for dirname, _, file_names in os.walk(path):
             print(df.shape, file_name)
             #splitBasedOnTime(df, 3600, 3600*250)
             print(getTotalTravelTime(df))
-            print(getTravelTimeShift(df, 6))
+            print(getTravelTime(df,8))
+            print(getTotalTravelTimeFirst(df))
+            #print(getTravelTimeShift(df, 6))
 
 
             #if name[0].find('txt') == -1:
             #    os.rename(dirname+file_name, dirname+name[0]+".txt")
 
-        if index > 5:
+        if index > 4:
             break
 
     break

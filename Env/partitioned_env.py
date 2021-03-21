@@ -42,6 +42,12 @@ class Partitioned_env(gym.Env):
 
     def get_states(self):
         obs, reward, done, info = self.env.get_states()
+
+        total_lanes = obs[2] + obs[3]
+        if total_lanes != self.num_lanes:
+            print("Total Lanes Changed:", total_lanes)
+            self.num_lanes = total_lanes
+
         obs, reward, done, info = self.decode_message(obs)
 
         if self.verbose > 1:

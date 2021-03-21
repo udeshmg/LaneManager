@@ -11,7 +11,7 @@ class DependencyGraph():
         self.max_exec_time = 0
 
         #settings
-        self.vehicle_value = 1;
+        self.vehicle_value = 1
 
 
     def buildGraph(self, OD_list):
@@ -183,9 +183,19 @@ class DependencyGraph():
                     if flow[1] > 0 and flow[2] >= self.diG.nodes[i]['up_configuration']:
                         conflict_counter[flow[0]] += 1
 
+            if increase:
+                for flow in self.diG.nodes[i]['list']:
+                    if self.diG.nodes[i]['up_configuration'] + self.diG.nodes[i]['down_configuration']  <= 4:
+                        conflict_counter[flow[0]] += 1
+
             if not decrease:
                 for flow in self.diG.nodes[i]['list']:
                     if flow[1] < 0 and flow[2] >= self.diG.nodes[i]['down_configuration']:
+                        conflict_counter[flow[0]] += 1
+
+            if decrease:
+                for flow in self.diG.nodes[i]['list']:
+                    if self.diG.nodes[i]['up_configuration'] + self.diG.nodes[i]['down_configuration'] <= 4:
                         conflict_counter[flow[0]] += 1
 
 

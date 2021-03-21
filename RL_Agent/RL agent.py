@@ -77,15 +77,15 @@ if __name__ == '__main__':
     print("Training time: ", end-start)
 
     #Results Plot
-    results_plotter.plot_results([log_dir], time_steps, results_plotter.X_TIMESTEPS, "Speed Limit Manager")
-    plt.show()
+    #results_plotter.plot_results([log_dir], time_steps, results_plotter.X_TIMESTEPS, "Speed Limit Manager")
+    #plt.show()
 
     #Additional Logs
     for k in range(3):
         array = np.zeros(shape=(10, 10))
         for i in range(10):
             for j in range(10):
-                obs = [i, j, k+2]
+                obs = [i, j, k+1]
                 array[i][j] = model.predict(obs, deterministic=True)[0]
         ax = sns.heatmap(array, linewidth=0.5)
         plt.show()
